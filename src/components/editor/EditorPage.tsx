@@ -4,7 +4,8 @@ import { CanvasToolbar } from "./top/CanvasToolbar";
 import { LayersPanel } from "./left/LayersPanel";
 import { TextInspector } from "./right/TextInspector";
 import { TextContentCard } from "./right/TextContentCard"
-import { EditorCanvasPlaceholder } from "./canvas/EditorCanvasPlaceholder";
+import CanvasStage from "./canvas/CanvasStage";
+// import { EditorCanvasPlaceholder } from "./canvas/CanvasStage";
 
 export default function EditorPage() {
   return (
@@ -35,7 +36,8 @@ export default function EditorPage() {
 
         <div className="p-6">
           {/* swap this placeholder with your dynamic react-konva component later */}
-          <EditorCanvasPlaceholder />
+          {/* <EditorCanvasPlaceholder /> */}
+          <CanvasStage/>
         </div>
       </section>
 
