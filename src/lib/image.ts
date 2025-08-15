@@ -1,12 +1,6 @@
-// lib/image.ts
-// import type { ProjectImage } from '@/types/editor';
+import { ProjectImage } from "@/types/editor";
 
-import { ProjectImage } from "@/app/types/editor";
-
-/**
- * Convert a PNG File into a dataURL and read natural width/height.
- * Throws if file is not a PNG.
- */
+// convrt pngimages to data url, like src path and file size
 export const decodePngFile = async (file: File): Promise<ProjectImage> => {
   if (file.type !== 'image/png') {
     throw new Error('Only PNG files are supported.');

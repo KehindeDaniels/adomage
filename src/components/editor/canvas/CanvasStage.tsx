@@ -6,7 +6,7 @@ import useImage from 'use-image';
 import { useViewportBox } from '@/hooks/useViewportBox';
 import { useDisplay, useEditorActions, useHasImage, useImageMeta } from '@/store/editorStore';
 import UploadController from '../UploadController';
-import FileDropTarget from './FileDropTarget'; // keep this if you added it
+import FileDropTarget from './FileDropTarget';
 
 const VIEWPORT_MAX_HEIGHT = 480;
 
@@ -16,23 +16,17 @@ const CanvasStage: React.FC = () => {
   const display = useDisplay();
   const { setImageFromFile, setDisplayByContainer } = useEditorActions();
 
-  // 1-liner: dataURL -> HTMLImageElement
   const [htmlImage] = useImage(image?.src || '', 'anonymous');
 
-  // Fixed-height viewport the Stage must fit into
   const viewportRef = useRef<HTMLDivElement>(null);
 
-  // Important: pass 'hasImage' so the hook re-inits when we switch from empty -> canvas
   const { width: boxW, height: boxH } = useViewportBox(viewportRef, hasImage);
 
-  // Whenever the viewport size changes, ask the store to fit the image into it.
-// Recompute when viewport size changes
-// before the effect:
-const imgSrc = image?.src;
+  const imgSrc = image?.src;
 
 useEffect(() => {
   if (!boxW || !boxH) return;
-  if (!imgSrc) return;           // ← no direct "image" reference
+  if (!imgSrc) return;         
   setDisplayByContainer(boxW, boxH);
 }, [boxW, boxH, imgSrc, setDisplayByContainer]);   // ← no 'image' in deps
 
@@ -50,7 +44,6 @@ useEffect(() => {
             className="h-[380px]"
           />
         ) : (
-          // If you added FileDropTarget, keep it — it enables drop over the Stage
           <FileDropTarget
             onFile={setImageFromFile}
             accept="image/png"
@@ -79,7 +72,6 @@ useEffect(() => {
                       height={display.height}
                     />
                   </Layer>
-                  {/* TODO: GuideLayer + TextLayer go here */}
                 </Stage>
               )}
             </div>

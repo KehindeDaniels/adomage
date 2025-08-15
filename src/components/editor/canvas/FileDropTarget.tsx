@@ -1,5 +1,6 @@
 'use client';
 
+import { cx } from 'class-variance-authority';
 import { useRef, useState } from 'react';
 
 type FileDropTargetProps = {
@@ -11,10 +12,6 @@ type FileDropTargetProps = {
   children: React.ReactNode;
 };
 
-/**
- * Wrap any area to accept drag-and-drop of a PNG file.
- * Prevents default browser navigation and calls onFile(file) on drop.
- */
 const FileDropTarget: React.FC<FileDropTargetProps> = ({
   onFile,
   accept = 'image/png',
@@ -63,13 +60,13 @@ const FileDropTarget: React.FC<FileDropTargetProps> = ({
   };
 
   return (
-    <div
-      className={['relative', className ?? ''].join(' ')}
-      onDragOver={handleDragOver}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
+  <div
+  className={cx('relative', className)}
+  onDragOver={handleDragOver}
+  onDragEnter={handleDragEnter}
+  onDragLeave={handleDragLeave}
+  onDrop={handleDrop}
+>
       {children}
 
       {isDragging && !disabled && (

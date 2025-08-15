@@ -25,19 +25,16 @@ export function useViewportBox<T extends HTMLElement>(
 
     const measure = () => {
       const rect = el.getBoundingClientRect();
-      // Guard against transient 0 sizes during layout
       const w = Math.max(0, Math.round(rect.width));
       const h = Math.max(0, Math.round(rect.height));
       setSize({ width: w, height: h });
     };
 
-    // Measure after layout
     const raf = requestAnimationFrame(measure);
 
     const ro = new ResizeObserver(measure);
     ro.observe(el);
 
-    // Also re-measure on window resizes/zoom
     window.addEventListener('resize', measure);
 
     return () => {
@@ -45,7 +42,6 @@ export function useViewportBox<T extends HTMLElement>(
       ro.disconnect();
       window.removeEventListener('resize', measure);
     };
-  }, [ref, enabled]); // <- will re-run when 'enabled' toggles or when element mounts
-
+  }, [ref, enabled]); 
   return size;
 }
