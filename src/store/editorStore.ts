@@ -63,7 +63,7 @@ async setImageFromFile(file) {
       name: 'canvas-project', 
       partialize: (state) => ({
         project: state.project,
-        view: { display: state.view.display }, // optional, harmless to persist
+        view: { display: state.view.display }, 
       }),
     }
   )

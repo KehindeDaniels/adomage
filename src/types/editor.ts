@@ -29,8 +29,35 @@ export type EditorActions = {
 };
 
 
+
+
+
+
+
+export type TextAlign = 'left' | 'center' | 'right';
+
+export type TextLayer = {
+  id: string;
+  text: string;
+  x: number;                
+  y: number;                
+  width?: number;           
+  rotation: number;         // degrees
+  fontFamily: string;
+  fontSize: number;         
+  fontWeight?: number | string;
+  fill: string;             // color
+  opacity: number;          // 0..1
+  align: TextAlign;
+  locked?: boolean;
+  zIndex: number;
+};
+
 export type EditorState = {
   project: EditorProjectSlice;
   view: EditorViewSlice;
   actions: EditorActions;
+
+  layers?: TextLayer[];
+  selectedId?: string | null;
 };
