@@ -49,8 +49,6 @@ export default function EditorPage() {
             historyIndex={0}
             historyLimit={20}
           />
-          {/* (Optional) if you later add a disabled prop to the toolbar button,
-              you can pass `disabled={!canExport}` here. */}
         </div>
 
         <div className="p-6">

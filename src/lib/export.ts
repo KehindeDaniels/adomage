@@ -39,9 +39,6 @@ export function exportPNGOriginal(
 ): string {
   const pixelRatio = computePixelRatioForOriginal(originalW, originalH, display);
 
-  // Konva will rasterize the current Stage at (stageW * pixelRatio) x (stageH * pixelRatio).
-  // Since stageW == display.width and stageH == display.height,
-  // the output becomes ~ originalW x originalH.
   const dataUrl = stage.toDataURL({
     pixelRatio,
     mimeType: 'image/png',
