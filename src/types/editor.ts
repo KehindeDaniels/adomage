@@ -33,6 +33,7 @@ export type TextLayer = {
   y: number;
   width?: number;
   rotation: number;
+  lineHeight?: number;
 
   // style
   fontFamily: string;

@@ -69,7 +69,7 @@ export const useEditorStore = create<EditorState>()(
             text: defaults?.text ?? 'Text layer',
             x: defaults?.x ?? Math.max(0, cx - 200),
             y: defaults?.y ?? Math.max(0, cy - 40),
-            width: defaults?.width,
+width: defaults?.width ?? Math.round(img.originalW * 0.6),            
             rotation: defaults?.rotation ?? 0,
             fontFamily: defaults?.fontFamily ?? 'Inter',
             fontSize: defaults?.fontSize ?? 64,
@@ -77,6 +77,7 @@ export const useEditorStore = create<EditorState>()(
             fill: defaults?.fill ?? '#ffffff',
             opacity: defaults?.opacity ?? 1,
             align: defaults?.align ?? 'left',
+            lineHeight: defaults?.lineHeight ?? 1.2,
             z: zForNew,  
             locked: defaults?.locked ?? false,
           };

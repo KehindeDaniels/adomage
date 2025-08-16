@@ -5,6 +5,8 @@ import React from 'react';
 import { Image as ImageIcon, Plus, Trash2, Pencil, GripVertical } from 'lucide-react';
 import UploadController from '../UploadController';
 import { shortFileLabel } from '@/lib/format';
+import { Textarea } from '@/components/ui/textarea';
+
 import {
   useImageMeta,
   useTextLayers,
@@ -13,7 +15,6 @@ import {
   useReorderTextLayers,
 } from '@/store/editorStore';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 type LayersPanelProps = {
@@ -177,15 +178,28 @@ const LayersPanel: React.FC<LayersPanelProps> = ({ hasImage, onReplace }) => {
               </div>
 
               {/* inline editor */}
-              {isEditing && (
-                <div className="mt-2" onClick={(e) => e.stopPropagation()}>
-                  <Input
-                    value={l.text}
-                    onChange={(e) => updateTextProps(l.id, { text: e.target.value })}
-                    placeholder="Type text…"
-                  />
-                </div>
-              )}
+{isEditing && (
+  <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+    <Textarea
+      value={l.text ?? ''}
+      onChange={(e) => updateTextProps(l.id, { text: e.target.value })}
+      placeholder="Type text…"
+      rows={4}
+      className="text-sm"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          // Enter = done (don’t insert a newline)
+          e.preventDefault();
+          setEditingId(null);
+        }
+        // Shift+Enter falls through → inserts "\n"
+      }}
+    />
+    <div className="mt-1 text-[11px] text-muted-foreground">
+      Shift+Enter = new line • Enter = done
+    </div>
+  </div>
+)}
             </div>
           );
         })}

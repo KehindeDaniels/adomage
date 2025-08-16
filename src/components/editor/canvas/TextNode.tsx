@@ -48,6 +48,8 @@ const TextNode: React.FC<Props> = ({ layer, scale, selected, onSelect }) => {
       fill={layer.fill}
       opacity={layer.opacity}
       align={layer.align}
+      lineHeight={layer.lineHeight ?? 1.2}  
+      wrap="word"
       rotation={layer.rotation}
       draggable={!layer.locked}
       listening
