@@ -42,7 +42,6 @@ export type TextLayer = {
   opacity: number;                  // 0..1
   align: TextAlign;
 
-  // stacking / flags
   z: number;
   locked?: boolean;
 };
@@ -52,7 +51,6 @@ export type EditorTextSlice = {
   selectedId: string | null;
 };
 
-// extend your existing EditorActions with text ops:
 export type EditorActions = {
   setImageFromFile: (file: File) => Promise<void>;
   clearImage: () => void;
@@ -62,6 +60,7 @@ export type EditorActions = {
   selectTextLayer: (id: string | null) => void;
   updateTextProps: (id: string, patch: Partial<TextLayer>) => void;
   deleteTextLayer: (id: string) => void;
+  reorderTextLayers(nextOrderIds: string[]): void;
 };
 
 // extend the state with the text slice:

@@ -57,7 +57,12 @@ export const useEditorStore = create<EditorState>()(
           const id = newTextId();
           const cx = img.originalW / 2;
           const cy = img.originalH / 2;
-          const zMax = get().text.layers.reduce((m, l) => Math.max(m, l.z), 0);
+          // const zMax = get().text.layers.reduce((m, l) => Math.max(m, l.z), 0);
+          const zMin = get().text.layers.length
+    ? get().text.layers.reduce((m, l) => Math.min(m, l.z), Infinity)
+    : 0;
+  const zForNew = Number.isFinite(zMin) ? zMin - 1 : 0;
+
 
           const layer: TextLayer = {
             id,
@@ -72,7 +77,7 @@ export const useEditorStore = create<EditorState>()(
             fill: defaults?.fill ?? '#ffffff',
             opacity: defaults?.opacity ?? 1,
             align: defaults?.align ?? 'left',
-            z: (zMax || 0) + 1,
+            z: zForNew,  
             locked: defaults?.locked ?? false,
           };
 
@@ -103,11 +108,24 @@ export const useEditorStore = create<EditorState>()(
             return { text: { layers: next, selectedId } };
           });
         },
+reorderTextLayers(nextOrderIds: string[]) {
+          set((state) => {
+            const byId = new Map(state.text.layers.map((l) => [l.id, l]));
+            const reordered = nextOrderIds
+              .map((id) => byId.get(id))
+              .filter((x): x is NonNullable<typeof x> => Boolean(x));
+
+            // Highest z on top (first item)
+            const total = reordered.length;
+            const withZ = reordered.map((l, idx) => ({ ...l, z: total - idx }));
+
+            return { text: { ...state.text, layers: withZ } };
+          });
+        },
       },
     }),
     {
       name: 'canvas-project',
-      // persist text too so it survives refresh
       partialize: (state) => ({
         project: state.project,
         view: { display: state.view.display },
@@ -126,3 +144,4 @@ export const useEditorActions= () => useEditorStore((s) => s.actions);
 // ✅ NEW selectors used by your panels/canvas
 export const useTextLayers   = () => useEditorStore((s) => s.text.layers);
 export const useSelectedId   = () => useEditorStore((s) => s.text.selectedId);
+export const useReorderTextLayers = () => useEditorStore((s) => s.actions.reorderTextLayers);
