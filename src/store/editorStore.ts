@@ -16,7 +16,7 @@ const newProjectId = () =>
 // project.image holds the uploaded PNG (dataURL + original size)
 // view.display is how big we render on screen (fit-to-container)
 // actions mutate the above
- 
+
 export const useEditorStore = create<EditorState>()(
   persist(
     (set, get) => ({
@@ -43,9 +43,9 @@ async setImageFromFile(file) {
 },
 
         clearImage() {
-          set((state) => ({
+          set(() => ({
             project: { projectId: newProjectId(), image: undefined },
-            view: { ...state.view, display: { width: 0, height: 0, scale: 0 } },
+            view: { display: { width: 0, height: 0, scale: 0 } },
           }));
         },
 
