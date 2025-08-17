@@ -61,7 +61,7 @@
 
     /* Core surfaces - Much better contrast hierarchy */
     --background: #fafaf9;         /* Warmest white - main background */
-    --foreground: #1c1917;         /* Rich dark brown - main text */
+    --foreground: #1c1917;         /* Richdark brown - main text */
 
     --card: #ffffff;               /* Pure white - elevated cards */
     --card-foreground: #1c1917;
