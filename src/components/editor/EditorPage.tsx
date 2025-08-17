@@ -1,4 +1,3 @@
-// src/components/editor/EditorPage.tsx  (excerpt)
 'use client';
 
 import { useRef } from 'react';
@@ -6,8 +5,7 @@ import type Konva from 'konva';
 import CanvasStage from './canvas/CanvasStage';
 import { CanvasToolbar } from './top/CanvasToolbar';
 import LayersPanel from './left/LayersPanel';           // ← updated import
-import { TextInspector } from './right/TextInspector';
-import { TextContentCard } from './right/TextContentCard';
+import  TextInspector  from './right/TextInspector';
 
 import { useEditorActions, useImageMeta } from '@/store/editorStore';
 import { useExportOriginal } from '@/hooks/useExportOriginal';
@@ -24,7 +22,6 @@ export default function EditorPage() {
         <h2 className="mb-3 text-sm font-medium">Layers</h2>
         <LayersPanel
           hasImage={Boolean(image)}
-          name={image?.name}
           onReplace={setImageFromFile}
         />
       </aside>
@@ -48,23 +45,9 @@ export default function EditorPage() {
         </div>
       </section>
 
-      <aside className="border-l bg-card p-3 space-y-4">
-        <TextInspector
-          fontFamily="Inter"
-          fontSize={80}
-          fontWeight="Bold"
-          color="#ffffff"
-          opacity={95}
-          align="center"
-          multiline
-          onChange={(patch) => console.log(patch)}
-        />
-        <TextContentCard
-          value="PREDICTT THER AN"
-          tag="background"
-          onChange={(v) => console.log('text:', v)}
-        />
-      </aside>
+<aside className="border-l bg-card p-3 space-y-4">
+  <TextInspector />
+</aside>
     </main>
   );
 }
