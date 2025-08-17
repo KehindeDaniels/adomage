@@ -7,7 +7,6 @@ export type FontLoadStatus = "idle" | "loading" | "active" | "inactive";
 
 /** Encode a family for CSS2 (spaces -> +, rest URL-encoded). */
 function encodeFamily(family: string): string {
-  // encodeURIComponent then turn spaces into '+'
   return encodeURIComponent(family.trim()).replace(/%20/g, "+");
 }
 
@@ -21,6 +20,13 @@ function buildCss2Href(family: string, weights: number[]): string {
   const famToken = encodeFamily(family);
   const wght = uniq.length ? `:wght@${uniq.join(";")}` : "";
   return `https://fonts.googleapis.com/css2?family=${famToken}${wght}&display=swap`;
+}
+
+/** Type guard: does this Document expose the CSS Font Loading API? */
+function hasFontLoadingAPI(
+  doc: Document
+): doc is Document & { fonts: FontFaceSet } {
+  return "fonts" in doc;
 }
 
 export function useFontLoader(
@@ -39,20 +45,37 @@ export function useFontLoader(
       setStatus("idle");
       return;
     }
-    if (typeof document === "undefined" || !("fonts" in document)) {
-      // very old browser: just assume active after link insert
+
+    // No DOM (SSR) or very old browser?
+    if (typeof document === "undefined" || !hasFontLoadingAPI(document)) {
+      // Best-effort: inject stylesheet and assume active.
+      const attr = "data-gf-href";
+      let link =
+        typeof document !== "undefined"
+          ? document.head.querySelector<HTMLLinkElement>(
+              `link[rel="stylesheet"][${attr}="${href}"]`
+            )
+          : null;
+
+      if (!link && typeof document !== "undefined") {
+        link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
+        link.setAttribute(attr, href);
+        document.head.appendChild(link);
+      }
+
       setStatus("active");
       return;
     }
 
     setStatus("loading");
 
+    // Inject the stylesheet once per unique href
     const attr = "data-gf-href";
     let link = document.head.querySelector<HTMLLinkElement>(
       `link[rel="stylesheet"][${attr}="${href}"]`
     );
-
-    // inject <link> once per unique href
     if (!link) {
       link = document.createElement("link");
       link.rel = "stylesheet";
@@ -61,36 +84,34 @@ export function useFontLoader(
       document.head.appendChild(link);
     }
 
+    const fonts = document.fonts; // FontFaceSet
     let cancelled = false;
     const weight = (weights[0] ?? 400) | 0;
-    // CSS Font Loading API: "font" shorthand → "<weight> 1em <family>"
+
+    // CSS Font Loading API shorthand: "<weight> 1em <family>"
     const fontShorthand = `${weight} 1em "${family}"`;
 
     // Failsafe timeout in case the network is super slow
-    const timeout = window.setTimeout(() => {
+    const timeoutId: number = window.setTimeout(() => {
       if (!cancelled) setStatus("inactive");
     }, 4000);
 
-    // Trigger a load & then wait for readiness
-    // (document.fonts.load returns a Promise<FontFace[]>)
-    // We ignore the result array; ready resolves when all pending loads settle.
-    void (document as any).fonts.load(fontShorthand);
-    (document as any).fonts.ready
+    // Kick off the load and wait for the ready-settle
+    void fonts.load(fontShorthand);
+    fonts.ready
       .then(() => {
         if (cancelled) return;
-        // If the face is available, check() returns true
-        const ok = (document as any).fonts.check(fontShorthand);
+        const ok = fonts.check(fontShorthand);
         setStatus(ok ? "active" : "inactive");
-        window.clearTimeout(timeout);
+        window.clearTimeout(timeoutId);
       })
       .catch(() => {
         if (!cancelled) setStatus("inactive");
-        window.clearTimeout(timeout);
+        window.clearTimeout(timeoutId);
       });
 
     return () => {
       cancelled = true;
-      window.clearTimeout(timeout);
     };
   }, [family, href, weights]);
 
