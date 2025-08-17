@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectValue, SelectItem } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Switch } from "@/components/ui/switch";
+// import { Switch } from "@/components/ui/switch";
 import { Card } from "@/components/ui/card";
 
 type Align = "left" | "center" | "right";
@@ -13,14 +13,14 @@ type Props = {
   fontSize: number;
   fontWeight: "Regular" | "Bold" | "Medium";
   color: string;
-  opacity: number; // 0-100
+  opacity: number; 
   align: Align;
   multiline: boolean;
   onChange: (patch: Partial<Props>) => void;
 };
 
 export function TextInspector(props: Props) {
-  const { fontFamily, fontSize, fontWeight, color, opacity, align, multiline, onChange } = props;
+  const { fontFamily, fontSize, fontWeight, color, opacity, align, onChange } = props;
 
   return (
     <Card className="p-4 space-y-4">
@@ -107,10 +107,10 @@ export function TextInspector(props: Props) {
             <ToggleGroupItem value="right">A</ToggleGroupItem>
           </ToggleGroup>
 
-          <div className="flex items-center justify-between rounded-md bg-muted/30 px-3 py-2">
+          {/* <div className="flex items-center justify-between rounded-md bg-muted/30 px-3 py-2">
             <span className="text-sm">Multi-line editing</span>
             <Switch checked={multiline} onCheckedChange={(v) => onChange({ multiline: v })} />
-          </div>
+          </div> */}
         </div>
       </div>
     </Card>
