@@ -9,6 +9,7 @@ import  TextInspector  from './right/TextInspector';
 
 import { useEditorActions, useImageMeta } from '@/store/editorStore';
 import { useExportOriginal } from '@/hooks/useExportOriginal';
+import TypographySection from './right/TypographySection';
 
 export default function EditorPage() {
   const stageRef = useRef<Konva.Stage>(null);
@@ -46,7 +47,8 @@ export default function EditorPage() {
       </section>
 
 <aside className="border-l bg-card p-3 space-y-4">
-  <TextInspector />
+  {/* <TextInspector /> */}
+  <TypographySection/>
 </aside>
     </main>
   );

@@ -1,69 +1,84 @@
-'use client';
+// src/components/editor/right/TypographySection.tsx
+"use client";
 
-import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
-import { useFontLoader } from '@/hooks/useFontLoader';
-import { useEditorActions, useSelectedId, useTextLayers } from '@/store/editorStore';
+import * as React from "react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { cn } from "@/lib/utils";
 
-// Some handy, popular families (user can also type any Google Font name)
-const COMMON_FONTS = [
-  'Inter',
-  'Roboto',
-  'Montserrat',
-  'Poppins',
-  'Lato',
-  'Open Sans',
-  'Oswald',
-  'Playfair Display',
-  'Source Sans 3',
-  'Nunito',
-];
+import {
+  useEditorActions,
+  useSelectedId,
+  useTextLayers,
+} from "@/store/editorStore";
+import { useFontLoader } from "@/hooks/useFontLoader";
+import { useGoogleFonts } from "@/hooks/useGoogleFonts";
 
-const WEIGHTS: Array<{ label: string; value: string }> = [
-  { label: '100', value: '100' },
-  { label: '200', value: '200' },
-  { label: '300', value: '300' },
-  { label: 'Regular (400)', value: '400' },
-  { label: '500', value: '500' },
-  { label: '600', value: '600' },
-  { label: 'Bold (700)', value: '700' },
-  { label: '800', value: '800' },
-  { label: '900', value: '900' },
-];
+// helpers
+const clamp = (n: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, n));
+const toNum = (v: string, fallback: number) =>
+  Number.isFinite(Number(v)) ? Number(v) : fallback;
 
-const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
-
-const findSelectedLayer = (layers: ReturnType<typeof useTextLayers>, id: string | null) =>
-  layers.find((l) => l.id === id);
-
-const parseWeight = (value: string | number | undefined) => {
-  if (typeof value === 'number') return String(value);
-  if (!value) return '400';
-  return value === 'bold' ? '700' : value === 'normal' ? '400' : value;
-};
-
-const toNum = (v: string, fallback: number) => {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : fallback;
-};
+function weightLabel(n: number) {
+  switch (n) {
+    case 100:
+      return "Thin (100)";
+    case 200:
+      return "Extra Light (200)";
+    case 300:
+      return "Light (300)";
+    case 400:
+      return "Regular (400)";
+    case 500:
+      return "Medium (500)";
+    case 600:
+      return "Semi Bold (600)";
+    case 700:
+      return "Bold (700)";
+    case 800:
+      return "Extra Bold (800)";
+    case 900:
+      return "Black (900)";
+    default:
+      return String(n);
+  }
+}
 
 const TypographySection: React.FC = () => {
+  // selection
   const selectedId = useSelectedId();
   const layers = useTextLayers();
+  const layer = layers.find((l) => l.id === selectedId) ?? null;
+
   const { updateTextProps } = useEditorActions();
 
-  const layer = findSelectedLayer(layers, selectedId ?? null);
+  // live Google Fonts catalog (cached locally)
+  const { fonts, loading, getWeightsFor } = useGoogleFonts();
 
-  // Load current family (and a couple of common weights)
+  // current family/weight (fallbacks when none yet)
+  const family: string | undefined = layer?.fontFamily;
+  const currentWeight: number =
+    typeof layer?.fontWeight === "number" ? layer.fontWeight : 400;
 
-  const family = layer?.fontFamily;
-  const weightStr = layer ? parseWeight(layer.fontWeight) : "400";
-  const status = useFontLoader(family, [400, 700, Number(weightStr)]);
+  // Load only what we need (stable array)
+  const weightsToLoad = React.useMemo<number[]>(
+    () => [currentWeight],
+    [currentWeight]
+  );
 
-  // Empty state (nothing selected)
+  // Always call the hook; it no-ops if no family
+  useFontLoader(family, weightsToLoad);
+
+  // empty state
   if (!layer) {
     return (
       <div className="rounded-lg border bg-card p-3">
@@ -75,8 +90,13 @@ const TypographySection: React.FC = () => {
     );
   }
 
-  const onChangeFamily = (family: string) => {
-    updateTextProps(layer.id, { fontFamily: family });
+  // build UI options
+  const availableWeights = getWeightsFor(layer.fontFamily);
+  const weightStr = String(currentWeight);
+
+  // handlers
+  const onChangeFamily = (nextFamily: string) => {
+    updateTextProps(layer.id, { fontFamily: nextFamily });
   };
 
   const onCommitFamilyInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,9 +115,8 @@ const TypographySection: React.FC = () => {
   };
 
   const onChangeWeight = (val: string) => {
-    // store as numeric 100..900 to keep it precise
-    const n = toNum(val, 400);
-    updateTextProps(layer.id, { fontWeight: n });
+    const n = toNum(val, currentWeight);
+    updateTextProps(layer.id, { fontWeight: n }); // keep numeric 100..900
   };
 
   return (
@@ -108,20 +127,26 @@ const TypographySection: React.FC = () => {
       <div className="grid gap-2">
         <Label htmlFor="fontFamily">Font family</Label>
         <div className="flex gap-2">
-          <Select onValueChange={onChangeFamily} value={layer.fontFamily}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Choose family" />
+          <Select
+            onValueChange={onChangeFamily}
+            value={layer.fontFamily}
+            disabled={loading}
+          >
+            <SelectTrigger className="w-[240px]">
+              <SelectValue
+                placeholder={loading ? "Loading fonts…" : "Choose family"}
+              />
             </SelectTrigger>
             <SelectContent>
-              {COMMON_FONTS.map((f) => (
-                <SelectItem key={f} value={f}>
-                  {f}
+              {fonts.map((f) => (
+                <SelectItem key={f.family} value={f.family}>
+                  {f.family}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
 
-          {/* Free text (any Google font name) */}
+          {/* Free text (any Google Font name) */}
           <Input
             id="fontFamily"
             placeholder="Or type a Google Font…"
@@ -130,12 +155,9 @@ const TypographySection: React.FC = () => {
             className="w-full"
           />
         </div>
-        {status === "loading" && (
-          <div className="text-[11px] text-muted-foreground">Loading font…</div>
-        )}
-        {status === "inactive" && (
-          <div className="text-[11px] text-destructive">
-            Couldn’t load that font family.
+        {loading && (
+          <div className="text-[11px] text-muted-foreground">
+            Fetching catalog…
           </div>
         )}
       </div>
@@ -172,13 +194,42 @@ const TypographySection: React.FC = () => {
             <SelectValue placeholder="Weight" />
           </SelectTrigger>
           <SelectContent>
-            {WEIGHTS.map((w) => (
-              <SelectItem key={w.value} value={w.value}>
-                {w.label}
+            {availableWeights.map((w) => (
+              <SelectItem key={w} value={String(w)}>
+                {weightLabel(w)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      {/* Opacity */}
+      <div className="space-y-1.5">
+        <Label>Opacity</Label>
+        <div className="flex items-center gap-3">
+          <div className="grow">
+            <Slider
+              value={[Math.round(layer.opacity * 100)]}
+              onValueChange={([v]) =>
+                updateTextProps(layer.id, { opacity: (v ?? 100) / 100 })
+              }
+              min={0}
+              max={100}
+              step={1}
+            />
+          </div>
+          <Input
+            className={cn("w-16 text-right")}
+            type="number"
+            min={0}
+            max={100}
+            value={Math.round(layer.opacity * 100)}
+            onChange={(e) => {
+              const n = Math.max(0, Math.min(100, Number(e.target.value || 0)));
+              updateTextProps(layer.id, { opacity: n / 100 });
+            }}
+          />
+        </div>
       </div>
     </div>
   );
