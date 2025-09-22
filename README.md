@@ -4,6 +4,8 @@ Image Text Composer
 
 A desktop-only, single-page editor for overlaying fully customizable text on PNG images. Built with Next.js + TypeScript, Konva for canvas interactions, and Zustand for state.
 
+![Editor](public/editor.png)
+
 Repo: https://github.com/CaesarBourne/AdomateImage
 Video walkthrough: https://drive.google.com/file/d/1cLmlyOTva-s0pLvDJCdTI_68xa_NGXyR/view?usp=sharing
 Live demo: add your Vercel URL here
@@ -43,7 +45,6 @@ Screenshots
 Replace these with real screenshots in /public.
 
 Editor UI
-![Editor](public/screenshot-editor.png)
 Export size chip
 ![Export](public/screenshot-export.png)
 
